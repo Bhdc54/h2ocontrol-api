@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Controle da Ventoinha</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+        }
+        button {
+            font-size: 20px;
+            padding: 15px 30px;
+            margin: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+        }
+        .ligar {
+            background-color: green;
+        }
+        .desligar {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Controle da Ventoinha</h1>
+
+    <button class="ligar" onclick="controlarVentoinha('ligar')">Ligar</button>
+    <button class="desligar" onclick="controlarVentoinha('desligar')">Desligar</button>
+
+    <script>
+        function controlarVentoinha(acao) {
+            let url = `https://h2ocontrol-api-production.up.railway.app/ventoinha/${acao}`;
+
+            fetch(url, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(`Ventoinha ${acao} com sucesso!`);
+                console.log(data);
+            })
+            .catch(error => {
+                alert("Erro ao enviar comando!");
+                console.error(error);
+            });
+        }
+    </script>
+
+</body>
+</html>
