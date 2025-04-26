@@ -24,6 +24,11 @@
         .desligar {
             background-color: red;
         }
+        .status {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -33,7 +38,12 @@
     <button class="ligar" onclick="controlarVentoinha('ligar')">Ligar</button>
     <button class="desligar" onclick="controlarVentoinha('desligar')">Desligar</button>
 
+    <div class="status" id="status">
+        Status: Desligada
+    </div>
+
     <script>
+        // Função para controlar a ventoinha (ligar ou desligar)
         function controlarVentoinha(acao) {
             let url = `https://h2ocontrol-api-production.up.railway.app/ventoinha/${acao}`;
 
@@ -42,8 +52,16 @@
             })
             .then(response => response.json())
             .then(data => {
+                // Atualiza o status na tela
+                let statusDiv = document.getElementById('status');
+                if (acao === 'ligar') {
+                    statusDiv.innerHTML = "Status: Ligada";
+                    statusDiv.style.color = 'green';
+                } else {
+                    statusDiv.innerHTML = "Status: Desligada";
+                    statusDiv.style.color = 'red';
+                }
                 alert(`Ventoinha ${acao} com sucesso!`);
-                console.log(data);
             })
             .catch(error => {
                 alert("Erro ao enviar comando!");
