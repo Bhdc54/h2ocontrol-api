@@ -28,7 +28,7 @@ async def receber_dados(data: SensorData):
         print(f"Distância: {data.distancia} cm")
         print(f"Timestamp: {datetime.now().isoformat()}")
 
-        # Continua só como exibição (decisão automática se quiser)
+        # Retorna a resposta com o estado atual da ventoinha
         return {
             "status": "sucesso",
             "timestamp": datetime.now().isoformat(),
@@ -49,10 +49,11 @@ async def listar_dados():
         "total": len(dados_sensores)
     }
 
-# NOVAS ROTAS para controlar a ventoinha
+# NOVAS ROTAS para controlar a ventoinha manualmente
 
 @app.post("/ventoinha/ligar")
 async def ligar_ventoinha():
+    """Liga a ventoinha manualmente"""
     global ventoinha_estado
     ventoinha_estado = True
     print("Ventoinha ligada manualmente!")
@@ -60,6 +61,7 @@ async def ligar_ventoinha():
 
 @app.post("/ventoinha/desligar")
 async def desligar_ventoinha():
+    """Desliga a ventoinha manualmente"""
     global ventoinha_estado
     ventoinha_estado = False
     print("Ventoinha desligada manualmente!")
@@ -67,5 +69,5 @@ async def desligar_ventoinha():
 
 @app.get("/ventoinha/estado")
 async def estado_ventoinha():
-    """Arduino consulta aqui o estado"""
+    """Retorna o estado atual da ventoinha"""
     return {"ventoinha": ventoinha_estado}
