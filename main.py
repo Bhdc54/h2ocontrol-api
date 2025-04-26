@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
+from typing import List
 
 app = FastAPI()
 
@@ -10,10 +11,16 @@ class SensorData(BaseModel):
     umidade: float
     distancia: float
 
+# Lista para armazenar os dados recebidos (simula um banco de dados simples)
+dados_sensores: List[SensorData] = []
+
 @app.post("/sensores")
 async def receber_dados(data: SensorData):
     """Recebe dados do Arduino e responde"""
     try:
+        # Armazena os dados na lista
+        dados_sensores.append(data)
+
         # Mostra os dados recebidos no terminal
         print(f"Temperatura: {data.temperatura} °C")
         print(f"Umidade: {data.umidade} %")
@@ -22,7 +29,7 @@ async def receber_dados(data: SensorData):
 
         # Decide se vai ligar ou desligar a ventoinha
         ventoinha = False
-        if data.temperatura > 30:  # Exemplo: liga ventoinha se temperatura > 30°C
+        if data.temperatura > 30:
             ventoinha = True
 
         return {
@@ -36,3 +43,12 @@ async def receber_dados(data: SensorData):
             "status": "erro",
             "detalhe": str(e)
         }
+
+# Nova rota GET para visualizar os dados
+@app.get("/sensores")
+async def listar_dados():
+    """Retorna todos os dados recebidos do Arduino"""
+    return {
+        "dados": dados_sensores,
+        "total": len(dados_sensores)
+    }
