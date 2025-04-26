@@ -11,31 +11,28 @@ class SensorData(BaseModel):
     umidade: float
     distancia: float
 
-# Lista para armazenar os dados recebidos (simula um banco de dados simples)
+# Lista para armazenar os dados recebidos
 dados_sensores: List[SensorData] = []
+
+# Variável para armazenar o estado da ventoinha
+ventoinha_estado = False
 
 @app.post("/sensores")
 async def receber_dados(data: SensorData):
-    """Recebe dados do Arduino e responde"""
+    """Recebe dados do Arduino"""
     try:
-        # Armazena os dados na lista
         dados_sensores.append(data)
 
-        # Mostra os dados recebidos no terminal
         print(f"Temperatura: {data.temperatura} °C")
         print(f"Umidade: {data.umidade} %")
         print(f"Distância: {data.distancia} cm")
         print(f"Timestamp: {datetime.now().isoformat()}")
 
-        # Decide se vai ligar ou desligar a ventoinha
-        ventoinha = False
-        if data.temperatura > 30:
-            ventoinha = True
-
+        # Continua só como exibição (decisão automática se quiser)
         return {
             "status": "sucesso",
             "timestamp": datetime.now().isoformat(),
-            "ventoinha": ventoinha
+            "ventoinha_estado_atual": ventoinha_estado
         }
 
     except Exception as e:
@@ -44,7 +41,6 @@ async def receber_dados(data: SensorData):
             "detalhe": str(e)
         }
 
-# Nova rota GET para visualizar os dados
 @app.get("/sensores")
 async def listar_dados():
     """Retorna todos os dados recebidos do Arduino"""
@@ -52,3 +48,24 @@ async def listar_dados():
         "dados": dados_sensores,
         "total": len(dados_sensores)
     }
+
+# NOVAS ROTAS para controlar a ventoinha
+
+@app.post("/ventoinha/ligar")
+async def ligar_ventoinha():
+    global ventoinha_estado
+    ventoinha_estado = True
+    print("Ventoinha ligada manualmente!")
+    return {"ventoinha": "ligada"}
+
+@app.post("/ventoinha/desligar")
+async def desligar_ventoinha():
+    global ventoinha_estado
+    ventoinha_estado = False
+    print("Ventoinha desligada manualmente!")
+    return {"ventoinha": "desligada"}
+
+@app.get("/ventoinha/estado")
+async def estado_ventoinha():
+    """Arduino consulta aqui o estado"""
+    return {"ventoinha": ventoinha_estado}
