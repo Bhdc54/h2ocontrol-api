@@ -63,7 +63,15 @@ async def listar_dados():
         "total": len(dados_sensores)
     }
 
-@app.get("/ventoinha/estado")
-async def estado_ventoinha():
-    """Consulta o estado da ventoinha"""
-    return {"ventoinha": ventoinha_estado}
+@app.post("/ventoinha/estado")
+async def alterar_estado_ventoinha(acao: str):
+    """Altera o estado da ventoinha"""
+    global ventoinha_estado
+    if acao == "ligar":
+        set_ventoinha_estado(True)
+        return {"status": "sucesso", "ventoinha": "ligada"}
+    elif acao == "desligar":
+        set_ventoinha_estado(False)
+        return {"status": "sucesso", "ventoinha": "desligada"}
+    else:
+        return {"status": "erro", "detalhe": "Ação inválida. Use 'ligar' ou 'desligar'."}
