@@ -10,23 +10,30 @@ class SensorData(BaseModel):
     temperatura: float
     umidade: float
     distancia: float
-    acao_ventoinha: str = None  # Novo campo para controlar a ventoinha
+    acao_ventoinha: str = None
+
+# Modelo para receber o estado da ventoinha
+class VentoinhaState(BaseModel):
+    estado: str  # "ligado" ou "desligado"
 
 # Lista para armazenar os dados recebidos
 dados_sensores: List[SensorData] = []
 
 # Variável para armazenar o estado da ventoinha
-ventoinha_estado = False
+ventoinha_estado = "desligado"  # Começa desligada
 
 # Função para definir o estado da ventoinha
-def set_ventoinha_estado(estado: bool):
+def set_ventoinha_estado(novo_estado: str):
     global ventoinha_estado
-    ventoinha_estado = estado
-    print(f"Ventoinha {'ligada' if ventoinha_estado else 'desligada'}")
+    if novo_estado in ["ligado", "desligado"]:
+        ventoinha_estado = novo_estado
+        print(f"Ventoinha agora está {ventoinha_estado}")
+    else:
+        print(f"Estado inválido recebido: {novo_estado}")
 
 @app.post("/sensores")
 async def receber_dados(data: SensorData):
-    """Recebe dados do Arduino e pode controlar a ventoinha"""
+    """Recebe dados do Arduino e controla a ventoinha"""
     try:
         dados_sensores.append(data)
 
@@ -35,13 +42,11 @@ async def receber_dados(data: SensorData):
         print(f"Distância: {data.distancia} cm")
         print(f"Timestamp: {datetime.now().isoformat()}")
 
-        # Se o campo acao_ventoinha for 'ligar', liga a ventoinha
+        # Se vier alguma ação da ventoinha
         if data.acao_ventoinha == "ligar":
-            set_ventoinha_estado(True)
-
-        # Se o campo acao_ventoinha for 'desligar', desliga a ventoinha
-        if data.acao_ventoinha == "desligar":
-            set_ventoinha_estado(False)
+            set_ventoinha_estado("ligado")
+        elif data.acao_ventoinha == "desligar":
+            set_ventoinha_estado("desligado")
 
         return {
             "status": "sucesso",
@@ -57,21 +62,22 @@ async def receber_dados(data: SensorData):
 
 @app.get("/sensores")
 async def listar_dados():
-    """Retorna todos os dados recebidos do Arduino"""
+    """Lista todos os dados recebidos"""
     return {
         "dados": dados_sensores,
         "total": len(dados_sensores)
     }
 
-@app.post("/ventoinha/estado")
-async def alterar_estado_ventoinha(acao: str):
-    """Altera o estado da ventoinha"""
-    global ventoinha_estado
-    if acao == "ligar":
-        set_ventoinha_estado(True)
-        return {"status": "sucesso", "ventoinha": "ligada"}
-    elif acao == "desligar":
-        set_ventoinha_estado(False)
-        return {"status": "sucesso", "ventoinha": "desligada"}
+@app.get("/ventoinha")
+async def obter_estado_ventoinha():
+    """Consulta o estado atual da ventoinha"""
+    return {"estado": ventoinha_estado}
+
+@app.post("/ventoinha")
+async def definir_estado_ventoinha(estado: VentoinhaState):
+    """Define manualmente o estado da ventoinha: 'ligado' ou 'desligado'"""
+    if estado.estado in ["ligado", "desligado"]:
+        set_ventoinha_estado(estado.estado)
+        return {"mensagem": f"Ventoinha agora está {ventoinha_estado}"}
     else:
-        return {"status": "erro", "detalhe": "Ação inválida. Use 'ligar' ou 'desligar'."}
+        return {"erro": "Estado inválido! Use 'ligado' ou 'desligado'."}
