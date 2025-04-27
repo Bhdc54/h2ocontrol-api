@@ -10,6 +10,7 @@ class SensorData(BaseModel):
     temperatura: float
     umidade: float
     distancia: float
+    acao_ventoinha: str = None  # Novo campo para controlar a ventoinha
 
 # Lista para armazenar os dados recebidos
 dados_sensores: List[SensorData] = []
@@ -19,7 +20,8 @@ ventoinha_estado = False
 
 @app.post("/sensores")
 async def receber_dados(data: SensorData):
-    """Recebe dados do Arduino"""
+    """Recebe dados do Arduino e pode controlar a ventoinha"""
+    global ventoinha_estado
     try:
         dados_sensores.append(data)
 
@@ -28,7 +30,16 @@ async def receber_dados(data: SensorData):
         print(f"Distância: {data.distancia} cm")
         print(f"Timestamp: {datetime.now().isoformat()}")
 
-        # Retorna a resposta com o estado atual da ventoinha
+        # Se o campo acao_ventoinha for 'ligar', liga a ventoinha
+        if data.acao_ventoinha == "ligar":
+            ventoinha_estado = True
+            print("Ventoinha ligada manualmente!")
+        
+        # Se o campo acao_ventoinha for 'desligar', desliga a ventoinha
+        if data.acao_ventoinha == "desligar":
+            ventoinha_estado = False
+            print("Ventoinha desligada manualmente!")
+
         return {
             "status": "sucesso",
             "timestamp": datetime.now().isoformat(),
@@ -49,25 +60,7 @@ async def listar_dados():
         "total": len(dados_sensores)
     }
 
-# NOVAS ROTAS para controlar a ventoinha manualmente
-
-@app.post("/ventoinha/ligar")
-async def ligar_ventoinha():
-    """Liga a ventoinha manualmente"""
-    global ventoinha_estado
-    ventoinha_estado = True
-    print("Ventoinha ligada manualmente!")
-    return {"ventoinha": "ligada"}
-
-@app.post("/ventoinha/desligar")
-async def desligar_ventoinha():
-    """Desliga a ventoinha manualmente"""
-    global ventoinha_estado
-    ventoinha_estado = False
-    print("Ventoinha desligada manualmente!")
-    return {"ventoinha": "desligada"}
-
 @app.get("/ventoinha/estado")
 async def estado_ventoinha():
-    """Retorna o estado atual da ventoinha"""
+    """Consulta o estado da ventoinha"""
     return {"ventoinha": ventoinha_estado}

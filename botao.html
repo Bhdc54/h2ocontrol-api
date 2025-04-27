@@ -42,17 +42,31 @@
         Status: Desligada
     </div>
 
+    <div id="temperatura">
+        <!-- Aqui será exibido a temperatura do sensor -->
+    </div>
+
     <script>
         // Função para controlar a ventoinha (ligar ou desligar)
         function controlarVentoinha(acao) {
-            let url = `https://h2ocontrol-api-production.up.railway.app/ventoinha/${acao}`;
+            // Dados de exemplo do sensor
+            const dadosSensor = {
+                temperatura: 25.5,  // Exemplo de temperatura
+                umidade: 60,       // Exemplo de umidade
+                distancia: 100,     // Exemplo de distância
+                acao_ventoinha: acao  // Passando a ação da ventoinha (ligar/desligar)
+            };
 
-            fetch(url, {
-                method: 'POST'
+            fetch('https://h2ocontrol-api-production.up.railway.app/sensores', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dadosSensor)
             })
             .then(response => response.json())
             .then(data => {
-                // Atualiza o status na tela
+                // Atualiza o status da ventoinha na tela
                 let statusDiv = document.getElementById('status');
                 if (acao === 'ligar') {
                     statusDiv.innerHTML = "Status: Ligada";
@@ -68,6 +82,22 @@
                 console.error(error);
             });
         }
+
+        // Função para atualizar a temperatura do sensor
+        function atualizarTemperatura() {
+            fetch('https://h2ocontrol-api-production.up.railway.app/sensores')
+                .then(response => response.json())
+                .then(data => {
+                    let temperatura = data.dados[data.dados.length - 1]?.temperatura || "Não disponível";
+                    document.getElementById('temperatura').innerHTML = `Temperatura atual: ${temperatura} °C`;
+                })
+                .catch(error => {
+                    console.error("Erro ao obter dados do sensor:", error);
+                });
+        }
+
+        // Atualiza a temperatura periodicamente
+        setInterval(atualizarTemperatura, 5000);  // Atualiza a cada 5 segundos
     </script>
 
 </body>
