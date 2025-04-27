@@ -34,7 +34,7 @@ async def receber_dados(data: SensorData):
         if data.acao_ventoinha == "ligar":
             ventoinha_estado = True
             print("Ventoinha ligada manualmente!")
-        
+
         # Se o campo acao_ventoinha for 'desligar', desliga a ventoinha
         if data.acao_ventoinha == "desligar":
             ventoinha_estado = False
