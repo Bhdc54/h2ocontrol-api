@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Controle da Ventoinha</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            font-size: 20px;
+            padding: 15px 30px;
+            margin: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+        }
+        .ligar {
+            background-color: green;
+        }
+        .desligar {
+            background-color: red;
+        }
+        .status, .dados {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .dados {
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Controle da Ventoinha</h1>
+
+    <div class="dados">
+        <h3>Última Leitura dos Sensores</h3>
+        <div id="temperatura">Temperatura: -- °C</div>
+        <div id="umidade">Umidade: -- %</div>
+        <div id="distancia">Distância: -- cm</div>
+    </div>
+
+    <div class="status">
+        <h3>Status da Ventoinha</h3>
+        <div id="statusVentoinha">Status: Desligada</div>
+    </div>
+
+    <button class="ligar" onclick="controlarVentoinha('ligar')">Ligar Ventoinha</button>
+    <button class="desligar" onclick="controlarVentoinha('desligar')">Desligar Ventoinha</button>
+
+    <script>
+        // Função para atualizar os dados dos sensores
+        function atualizarDadosSensores() {
+            let url = "https://h2ocontrol-api-production.up.railway.app/sensores"; // Rota onde os dados são recebidos
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Atualiza os dados dos sensores
+                    document.getElementById('temperatura').innerHTML = `Temperatura: ${data[0].temperatura} °C`;
+                    document.getElementById('umidade').innerHTML = `Umidade: ${data[0].umidade} %`;
+                    document.getElementById('distancia').innerHTML = `Distância: ${data[0].distancia} cm`;
+                })
+                .catch(error => {
+                    console.error("Erro ao obter os dados dos sensores:", error);
+                });
+        }
+
+        // Função para controlar a ventoinha
+        function controlarVentoinha(acao) {
+            let url = `https://h2ocontrol-api-production.up.railway.app/ventoinha/${acao}`;
+
+            fetch(url, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Atualiza o estado da ventoinha na tela
+                let statusDiv = document.getElementById('statusVentoinha');
+                if (acao === 'ligar') {
+                    statusDiv.innerHTML = "Status: Ligada";
+                    statusDiv.style.color = 'green';
+                } else {
+                    statusDiv.innerHTML = "Status: Desligada";
+                    statusDiv.style.color = 'red';
+                }
+                alert(`Ventoinha ${acao} com sucesso!`);
+            })
+            .catch(error => {
+                alert("Erro ao enviar comando!");
+                console.error(error);
+            });
+        }
+
+        // Atualizar os dados dos sensores a cada 10 segundos
+        setInterval(atualizarDadosSensores, 10000);
+
+        // Inicializa com a primeira leitura
+        atualizarDadosSensores();
+    </script>
+
+</body>
+</html>
