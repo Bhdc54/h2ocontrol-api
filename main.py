@@ -18,10 +18,15 @@ dados_sensores: List[SensorData] = []
 # Variável para armazenar o estado da ventoinha
 ventoinha_estado = False
 
+# Função para definir o estado da ventoinha
+def set_ventoinha_estado(estado: bool):
+    global ventoinha_estado
+    ventoinha_estado = estado
+    print(f"Ventoinha {'ligada' if ventoinha_estado else 'desligada'}")
+
 @app.post("/sensores")
 async def receber_dados(data: SensorData):
     """Recebe dados do Arduino e pode controlar a ventoinha"""
-    global ventoinha_estado
     try:
         dados_sensores.append(data)
 
@@ -32,13 +37,11 @@ async def receber_dados(data: SensorData):
 
         # Se o campo acao_ventoinha for 'ligar', liga a ventoinha
         if data.acao_ventoinha == "ligar":
-            ventoinha_estado = True
-            print("Ventoinha ligada manualmente!")
+            set_ventoinha_estado(True)
 
         # Se o campo acao_ventoinha for 'desligar', desliga a ventoinha
         if data.acao_ventoinha == "desligar":
-            ventoinha_estado = False
-            print("Ventoinha desligada manualmente!")
+            set_ventoinha_estado(False)
 
         return {
             "status": "sucesso",
