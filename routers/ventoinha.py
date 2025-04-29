@@ -13,6 +13,9 @@ def set_ventoinha_estado(novo_estado: str):
     if novo_estado in ["ligado", "desligado"]:
         ventoinha_estado = novo_estado
 
+def get_ventoinha_estado() -> str:
+    return ventoinha_estado
+
 @router.get("/ventoinha")
 async def obter_estado_ventoinha():
     return {"estado": ventoinha_estado}
@@ -24,4 +27,3 @@ async def definir_estado_ventoinha(estado: VentoinhaState):
         return {"mensagem": f"Ventoinha agora está {ventoinha_estado}"}
     else:
         return {"erro": "Estado inválido! Use 'ligado' ou 'desligado'."}
-
