@@ -1,5 +1,7 @@
 from fastapi import FastAPI
-from .routers import sensores, ventoinha
+from api.routers import sensores
+from api.routers import ventoinha
+
 
 app = FastAPI()
 
