@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from firebase_admin import db  # CORRETO
+from firebase_admin import db  
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List
